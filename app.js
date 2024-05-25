@@ -11,7 +11,7 @@ app.get('/hello', async (req, res) => {
   try {
     await client.connect();
     const result = await client.query('SELECT NOW()');
-    res.send(`Hello! The current time is: ${result.rows[0].now}`);
+    res.send(`Hello World! The current time is: ${result.rows[0].now}`);
   } catch (err) {
     res.status(500).send('Database connection error');
   } finally {
