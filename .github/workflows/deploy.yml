@@ -1,0 +1,42 @@
+name: Deploy to Azure
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '18'
+
+    - name: Build Docker image
+      run: docker build -t se4453finalimage .
+
+    - name: Log in to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Log in to Azure Container Registry
+      run: |
+        echo ${{ secrets.REGISTRY_PASSWORD }} | docker login se4453finalregistryselim.azurecr.io -u ${{ secrets.REGISTRY_USERNAME }} --password-stdin
+
+    - name: Push Docker image to ACR
+      run: |
+        docker tag se4453finalimage se4453finalregistryselim.azurecr.io/se4453finalimage:latest
+        docker push se4453finalregistryselim.azurecr.io/se4453finalimage:latest
+
+    - name: Deploy to Azure Web App
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: SE4453FinalWebApp
+        images: se4453finalregistryselim.azurecr.io/se4453finalimage:latest
