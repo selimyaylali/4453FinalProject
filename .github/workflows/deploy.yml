@@ -10,16 +10,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2  # Updated to v2
+      uses: actions/checkout@v2
 
     - name: Set up Node.js
-      uses: actions/setup-node@v2  # Updated to v2
+      uses: actions/setup-node@v2
       with:
         node-version: '18'
 
     - name: Build Docker image
       run: |
         docker build -t se4453finalimage .
+
+    - name: Log in to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
 
     - name: Log in to Azure Container Registry
       run: |
@@ -30,15 +35,9 @@ jobs:
         docker tag se4453finalimage se4453finalregistryselim.azurecr.io/se4453finalimage:latest
         docker push se4453finalregistryselim.azurecr.io/se4453finalimage:latest
 
-    - name: Log in to Azure
-      uses: azure/login@v1  # Updated to v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v2
       with:
         app-name: SE4453FinalWebApp
         images: se4453finalregistryselim.azurecr.io/se4453finalimage:latest
-        slot-name: production
-        resource-group-name: SE4453ResourceGroup  # Correct input
+        resource-group-name: SE4453ResourceGroup
